@@ -90,36 +90,33 @@ function creerUnSlider(label, tabVehicules, min, max, val, step, posX, posY, pro
 }
 
 function draw() {
+  image(oceanImage, 800, 400, width, height);
 
+  // mettre à jour le nombre de boids
+  labelNbBoids.html("Nombre de boids : " + flock.length);
 
-  
-    image(this.oceanImage, 800, 400, width, height);
-    // mettre à jour le nombre de boids
-    labelNbBoids.html("Nombre de boids : " + flock.length);
+  // Dessiner la cible qui suit la souris
+  target.x = mouseX;
+  target.y = mouseY;
+  fill("lightgreen");
+  noStroke();
+  ellipse(target.x, target.y, target.r, target.r);
 
-    // on dessine la cible qui suit la souris
-    target.x = mouseX;
-    target.y = mouseY;
-    fill("lightgreen");
-    noStroke();
-    ellipse(target.x, target.y, target.r, target.r);
-
+  // Dessiner les boids
   for (let boid of flock) {
-    //boid.edges();
     boid.flock(flock);
-
     boid.followWithTargetRadius(target);
-
     boid.update();
     boid.show();   
-}
+  }
 
+  // Mettre à jour et afficher les obstacles
+  for (let obstacle of obstacles) {
+    obstacle.update();  // Mise à jour du mouvement des obstacles
+    obstacle.show();    // Affichage des obstacles
+  }
 
-  
-  // Dessiner les obstacles
-  obstacles.forEach(obstacle => obstacle.show());
-
-  // Mettre à jour et afficher les poissons
+  // Mettre à jour et afficher les poissons (boids)
   for (let boid of flock) {
     boid.followWithTargetRadius(target); // Les poissons fuient la souris
     let avoidForce = boid.avoid(obstacles); // Les poissons évitent les obstacles
@@ -131,18 +128,12 @@ function draw() {
     boid.show();
   }
 
+  // Ajouter un obstacle en cliquant
+  function mousePressed() {
+    obstacles.push(new Obstacle(mouseX, mouseY, random(20, 100), "green"));
+  }
 
-
-// Ajouter un obstacle en cliquant
-function mousePressed() {
-  obstacles.push(new Obstacle(mouseX, mouseY, random(20, 100), "green"));
-}
-
-
-
-
-
-  // dessin du requin
+  // Dessin du requin
   let wanderForce = requin.wander();
   wanderForce.mult(1);
   requin.applyForce(wanderForce);
@@ -150,8 +141,6 @@ function mousePressed() {
   // calcul du poisson le plus proche
   let seekForce;
   let rayonDeDetection = 70;
-  // dessin du cercle en fil de fer jaune
-
 
   noFill();
   stroke("yellow");
@@ -160,33 +149,22 @@ function mousePressed() {
   let closest = requin.getVehiculeLePlusProche(flock);
 
   if (closest) {
-    // distance entre le requin et le poisson le plus proche
     let d = p5.Vector.dist(requin.pos, closest.pos);
-    if(d < rayonDeDetection) {
-      // on fonce vers le poisson !!!
+    if (d < rayonDeDetection) {
       seekForce = requin.seek(closest.pos);
       seekForce.mult(7);
       requin.applyForce(seekForce);
     }
     if (d < 5) {
-      // on mange !!!!
-      // on retire le poisson du tableau flock
       let index = flock.indexOf(closest);
       flock.splice(index, 1);
     }
   }
-    requin.edges();
+
+  requin.edges();
   requin.update();
   requin.show();
-
-  /*flock.forEach(v => {
-    // pursuer = le véhicule poursuiveur, il vise un point devant la cible
-    v.applyBehaviors(target, obstacles, flock);
-    // déplacement et dessin du véhicule et de la target
-    v.update();
-    v.show();
-  });*/
-  }
+}
 
 function mouseDragged() {
   const b = new Boid(mouseX, mouseY, fishImage);
