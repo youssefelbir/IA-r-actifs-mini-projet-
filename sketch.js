@@ -11,7 +11,7 @@ let obstacles = [];
 let alignSlider, cohesionSlider, separationSlider;
 let labelNbBoids;
 let followLeaderMode = false;
-
+let requinSupprime = false;
 let target;
 let requin;
 
@@ -106,10 +106,10 @@ function draw() {
   for (let boid of flock) {
     boid.flock(flock);
     
-    if (followLeaderMode) {
+    if (followLeaderMode && !requinSupprime) {
       // Si le mode suivi du leader est activé, les boids suivent le requin
       boid.followLeader(requin);  // Boid suit le requin comme leader
-    } else {
+    } else if (!requinSupprime) {
       // Sinon, ils suivent simplement la souris comme cible
       boid.followWithTargetRadius(target);
     }
@@ -140,37 +140,43 @@ function draw() {
     obstacles.push(new Obstacle(mouseX, mouseY, random(20, 100), "green"));
   }
 
-  // Dessin du requin
-  let wanderForce = requin.wander();
-  wanderForce.mult(1);
-  requin.applyForce(wanderForce);
+   // Vérifier si le requin doit être supprimé ou non
+   if (!requinSupprime) {
+    let wanderForce = requin.wander();
+    wanderForce.mult(1);
+    requin.applyForce(wanderForce);
 
-  // Calcul du poisson le plus proche
-  let seekForce;
-  let rayonDeDetection = 70;
+    requin.edges();
+    requin.update();
+    requin.show();
 
-  noFill();
-  stroke("yellow");
-  ellipse(requin.pos.x, requin.pos.y, rayonDeDetection*2, rayonDeDetection*2);
+    // Calcul du poisson le plus proche
+    let seekForce;
+    let rayonDeDetection = 70;
 
-  let closest = requin.getVehiculeLePlusProche(flock);
+    noFill();
+    stroke("yellow");
+    ellipse(requin.pos.x, requin.pos.y, rayonDeDetection*2, rayonDeDetection*2);
 
-  if (closest) {
-    let d = p5.Vector.dist(requin.pos, closest.pos);
-    if (d < rayonDeDetection) {
-      seekForce = requin.seek(closest.pos);
-      seekForce.mult(7);
-      requin.applyForce(seekForce);
+    let closest = requin.getVehiculeLePlusProche(flock);
+
+    if (closest) {
+      let d = p5.Vector.dist(requin.pos, closest.pos);
+      if (d < rayonDeDetection) {
+        seekForce = requin.seek(closest.pos);
+        seekForce.mult(7);
+        requin.applyForce(seekForce);
+      }
+      if (d < 5) {
+        let index = flock.indexOf(closest);
+        flock.splice(index, 1);
+      }
     }
-    if (d < 5) {
-      let index = flock.indexOf(closest);
-      flock.splice(index, 1);
-    }
+
+    requin.edges();
+    requin.update();
+    requin.show();
   }
-
-  requin.edges();
-  requin.update();
-  requin.show();
 }
 
 
@@ -200,6 +206,9 @@ function keyPressed() {
   } else if (key === 'f') {
     // Alterner entre le mode suivi du leader (requin) 
     followLeaderMode = !followLeaderMode;
+  }else if (key === 't') {
+    // Lorsque la touche 't' est pressée, supprimer le requin
+    requinSupprime = true;
   }
 }
 
