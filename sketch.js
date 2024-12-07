@@ -14,6 +14,8 @@ let followLeaderMode = false;
 let requinSupprime = false;
 let target;
 let requin;
+let gameStarted = false; 
+let gameOver = false; 
 
 function preload() {
   // On charge une image de poisson
@@ -90,6 +92,30 @@ function creerUnSlider(label, tabVehicules, min, max, val, step, posX, posY, pro
 }
 
 function draw() {
+  if (!gameStarted && !gameOver) {
+    background(0); // Fond noir
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255); // Couleur blanche pour le texte
+    text("Appuyez sur 'S' pour démarrer", width / 2, height / 2);
+    return; // Arrête la fonction ici si le jeu n'est pas démarré
+  }
+
+  if (gameOver) {
+    background(0); // Fond noir
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    fill(255, 0, 0); // Texte rouge
+    text("Game Over !", width / 2, height / 2);
+    return; // Arrête la fonction ici si le jeu est terminé
+  }
+
+  // Vérifier si le nombre de boids est 0
+  if (flock.length === 0) {
+    gameOver = true; // Passe directement à l'état "Game Over"
+    return; // Arrête la boucle pour afficher le message "Game Over"
+  }
+  // Jeu principal
   image(oceanImage, 800, 400, width, height);
 
   // Mettre à jour le nombre de boids
@@ -196,7 +222,15 @@ function mousePressed() {
 }
 
 function keyPressed() {
-  if (key === 'd') {
+  if (key === 's') {
+    // Démarrer le jeu
+    gameStarted = true;
+    gameOver = false;
+  } else if (key === 'o') {
+    // Terminer le jeu
+    gameOver = true;
+    gameStarted = false;
+  } if (key === 'd') {
     Boid.debug = !Boid.debug;
   } else if (key === 'r') {
     // On donne une taille différente à chaque boid
