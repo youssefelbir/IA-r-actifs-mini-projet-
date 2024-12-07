@@ -19,7 +19,9 @@ function preload() {
   fishImage = loadImage('assets/fish.png');
   requinImage = loadImage('assets/shark.png');
   oceanImage = loadImage('assets/ocean.jpg');
+  obstacleImage = loadImage('assets/rock.png');
 }
+
 
 function setup() {
   
@@ -121,7 +123,7 @@ function draw() {
   for (let boid of flock) {
     boid.followWithTargetRadius(target); // Les poissons fuient la souris
     let avoidForce = boid.avoid(obstacles); // Les poissons évitent les obstacles
-    avoidForce.mult(2);
+    avoidForce.mult(10);
     boid.applyForce(avoidForce);
 
     boid.flock(flock); // Comportement de groupe
@@ -197,7 +199,7 @@ function mouseDragged() {
 }
 function mousePressed() {
   // TODO : ajouter un obstacle de taille aléatoire à la position de la souris
-  obstacles.push(new Obstacle(mouseX, mouseY, random(20, 100), "green"));
+  obstacles.push(new Obstacle(mouseX, mouseY, random(20, 100), ));
 }
 
 function keyPressed() {
