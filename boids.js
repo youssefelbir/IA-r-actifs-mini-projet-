@@ -12,8 +12,8 @@ class Boid {
     this.vel = p5.Vector.random2D();
     this.vel.setMag(random(2, 4));
     this.acc = createVector();
-    this.maxForce = 0.2;
-    this.maxSpeed = 5;
+    this.maxForce = 0.4;
+    this.maxSpeed = 3;
     this.r = 6;
 
     // si le boid est une image
@@ -434,6 +434,19 @@ class Boid {
       this.pos.y = 0;
     } else if (this.pos.y < 0) {
       this.pos.y = height;
+    }
+  }
+
+  followLeader(leader) {
+    let desired = p5.Vector.sub(leader.pos, this.pos); 
+    let distance = desired.mag();
+  
+    // Si la distance est trop grande ou trop petite, ajuster la vitesse
+    if (distance > 5) {
+      desired.setMag(this.maxSpeed);  // Vitesse maximale du boid
+      let steering = p5.Vector.sub(desired, this.vel);
+      steering.limit(this.maxForce); // Limiter l'accélération
+      this.applyForce(steering);
     }
   }
 

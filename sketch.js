@@ -10,6 +10,7 @@ let requinImage;
 let obstacles = [];
 let alignSlider, cohesionSlider, separationSlider;
 let labelNbBoids;
+let followLeaderMode = false;
 
 let target;
 let requin;
@@ -41,7 +42,6 @@ function setup() {
   creerUnSlider("Perception radius", flock, 15, 60, 25, 1, 10, posYSliderDeDepart+150,"perceptionRadius");
 
   // On créer les "boids". Un boid en anglais signifie "un oiseau" ou "un poisson"
-  // Dans cet exemple c'est l'équivalent d'un véhicule dans les autres exemples
   for (let i = 0; i < 200; i++) {
     const b = new Boid(random(width), random(height), fishImage);
     b.r = random(8, 40);
@@ -92,7 +92,7 @@ function creerUnSlider(label, tabVehicules, min, max, val, step, posX, posY, pro
 function draw() {
   image(oceanImage, 800, 400, width, height);
 
-  // mettre à jour le nombre de boids
+  // Mettre à jour le nombre de boids
   labelNbBoids.html("Nombre de boids : " + flock.length);
 
   // Dessiner la cible qui suit la souris
@@ -105,7 +105,15 @@ function draw() {
   // Dessiner les boids
   for (let boid of flock) {
     boid.flock(flock);
-    boid.followWithTargetRadius(target);
+    
+    if (followLeaderMode) {
+      // Si le mode suivi du leader est activé, les boids suivent le requin
+      boid.followLeader(requin);  // Boid suit le requin comme leader
+    } else {
+      // Sinon, ils suivent simplement la souris comme cible
+      boid.followWithTargetRadius(target);
+    }
+
     boid.update();
     boid.show();   
   }
@@ -115,9 +123,8 @@ function draw() {
     obstacle.update();  // Mise à jour du mouvement des obstacles
     obstacle.show();    // Affichage des obstacles
   }
-
-  // Mettre à jour et afficher les poissons (boids)
-  for (let boid of flock) {
+   // Mettre à jour et afficher les poissons (boids)
+   for (let boid of flock) {
     boid.followWithTargetRadius(target); // Les poissons fuient la souris
     let avoidForce = boid.avoid(obstacles); // Les poissons évitent les obstacles
     avoidForce.mult(10);
@@ -138,7 +145,7 @@ function draw() {
   wanderForce.mult(1);
   requin.applyForce(wanderForce);
 
-  // calcul du poisson le plus proche
+  // Calcul du poisson le plus proche
   let seekForce;
   let rayonDeDetection = 70;
 
@@ -166,6 +173,8 @@ function draw() {
   requin.show();
 }
 
+
+
 function mouseDragged() {
   const b = new Boid(mouseX, mouseY, fishImage);
   
@@ -181,13 +190,16 @@ function mousePressed() {
 }
 
 function keyPressed() {
- if (key === 'd') {
+  if (key === 'd') {
     Boid.debug = !Boid.debug;
   } else if (key === 'r') {
     // On donne une taille différente à chaque boid
     flock.forEach(b => {
       b.r = random(8, 40);
     });
+  } else if (key === 'f') {
+    // Alterner entre le mode suivi du leader (requin) 
+    followLeaderMode = !followLeaderMode;
   }
 }
 
